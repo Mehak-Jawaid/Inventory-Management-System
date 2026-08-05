@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Login — StockFlow{% endblock %}
+
+{% block auth_content %}
+<section class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-brand">
+      <span class="brand-mark large">IM</span>
+      <h1>StockFlow</h1>
+      <p>Track stock, catch low inventory, and keep your catalog organized.</p>
+    </div>
+    <form method="POST" class="auth-form" novalidate>
+      <h2>Sign in</h2>
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required autofocus placeholder="admin">
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required placeholder="••••••••">
+
+      <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      <p class="auth-hint">Demo login: <strong>admin</strong> / <strong>admin123</strong></p>
+    </form>
+  </div>
+</section>
+{% endblock %}

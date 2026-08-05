@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Inventory Manager{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  {% if session.get('user_id') %}
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">IM</span>
+        <div>
+          <p class="brand-name">StockFlow</p>
+          <p class="brand-tag">Inventory System</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint in ['products', 'add_product', 'edit_product'] %}active{% endif %}">Products</a>
+        <a href="{{ url_for('add_product') }}" class="nav-link {% if request.endpoint == 'add_product' %}active{% endif %}">Add Product</a>
+        <a href="{{ url_for('export_csv') }}" class="nav-link">Export CSV</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p class="user-chip">{{ session.get('username') }}</p>
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Log out</a>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+        <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      </header>
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% else %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack auth-flashes">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block auth_content %}{% endblock %}
+  {% endif %}
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

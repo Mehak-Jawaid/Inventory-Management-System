@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Products — StockFlow{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<section class="toolbar">
+  <form method="GET" class="search-form" action="{{ url_for('products') }}">
+    <input
+      type="search"
+      name="q"
+      value="{{ search }}"
+      placeholder="Search by name, SKU, or description…"
+      aria-label="Search products"
+    >
+    <select name="category" aria-label="Filter by category">
+      <option value="">All categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat.category }}" {% if selected_category == cat.category %}selected{% endif %}>
+        {{ cat.category }}
+      </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if search or selected_category %}
+    <a href="{{ url_for('products') }}" class="btn btn-ghost">Clear</a>
+    {% endif %}
+  </form>
+  <div class="toolbar-actions">
+    <a href="{{ url_for('export_csv') }}" class="btn btn-secondary">Export CSV</a>
+    <a href="{{ url_for('add_product') }}" class="btn btn-primary">Add Product</a>
+  </div>
+</section>
+
+<section class="panel">
+  {% if products %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>SKU</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>
+            <strong>{{ product.name }}</strong>
+            {% if product.description %}
+            <span class="muted">{{ product.description }}</span>
+            {% endif %}
+          </td>
+          <td><code>{{ product.sku }}</code></td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.quantity }}</td>
+          <td>${{ "%.2f"|format(product.price) }}</td>
+          <td>
+            {% if product.quantity == 0 %}
+            <span class="status status-critical">Out of stock</span>
+            {% elif product.quantity <= low_stock_threshold %}
+            <span class="status status-warning">Low stock</span>
+            {% else %}
+            <span class="status status-ok">In stock</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('delete_product', product_id=product.id) }}" class="inline-form delete-form">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="table-footer">{{ products|length }} product{% if products|length != 1 %}s{% endif %}</p>
+  {% else %}
+  <p class="empty-state">
+    No products found.
+    {% if search or selected_category %}
+    Try a different search, or <a href="{{ url_for('products') }}">clear filters</a>.
+    {% else %}
+    <a href="{{ url_for('add_product') }}">Add your first product</a>.
+    {% endif %}
+  </p>
+  {% endif %}
+</section>
+{% endblock %}

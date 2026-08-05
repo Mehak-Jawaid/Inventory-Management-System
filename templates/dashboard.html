@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — StockFlow{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="stats-grid">
+  <article class="stat">
+    <p class="stat-label">Products</p>
+    <p class="stat-value">{{ total_products }}</p>
+  </article>
+  <article class="stat">
+    <p class="stat-label">Total Units</p>
+    <p class="stat-value">{{ total_units }}</p>
+  </article>
+  <article class="stat">
+    <p class="stat-label">Inventory Value</p>
+    <p class="stat-value">${{ "%.2f"|format(inventory_value) }}</p>
+  </article>
+  <article class="stat {% if low_stock_items %}stat-alert{% endif %}">
+    <p class="stat-label">Low Stock</p>
+    <p class="stat-value">{{ low_stock_items|length }}</p>
+  </article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Low Stock Alerts</h2>
+      <span class="badge">≤ {{ low_stock_threshold }} units</span>
+    </div>
+    {% if low_stock_items %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Qty</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in low_stock_items %}
+          <tr class="{% if item.quantity == 0 %}row-critical{% else %}row-warning{% endif %}">
+            <td>{{ item.name }}</td>
+            <td><code>{{ item.sku }}</code></td>
+            <td><span class="qty-pill">{{ item.quantity }}</span></td>
+            <td><a href="{{ url_for('edit_product', product_id=item.id) }}" class="link">Restock</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty-state">All products are above the low-stock threshold.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>By Category</h2>
+    </div>
+    {% if categories %}
+    <ul class="category-list">
+      {% for cat in categories %}
+      <li>
+        <div>
+          <strong>{{ cat.category }}</strong>
+          <span>{{ cat.count }} products</span>
+        </div>
+        <span class="category-units">{{ cat.units }} units</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">No categories yet.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-header">
+    <h2>Recently Updated</h2>
+    <a href="{{ url_for('products') }}" class="link">View all</a>
+  </div>
+  {% if recent_products %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>SKU</th>
+          <th>Category</th>
+          <th>Qty</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in recent_products %}
+        <tr>
+          <td>{{ product.name }}</td>
+          <td><code>{{ product.sku }}</code></td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.quantity }}</td>
+          <td>${{ "%.2f"|format(product.price) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No products yet. <a href="{{ url_for('add_product') }}">Add your first product</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
