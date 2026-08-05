@@ -97,12 +97,54 @@ On first run, the app creates `inventory.db` and seeds sample products automatic
 | Username | `admin`          |
 | Password | `Inventory@2026` |
 
+## Deploy on Render
+
+### 1. Push the project to GitHub
+
+Make sure this repo is on GitHub (Render deploys from a Git repo).
+
+### 2. Create a Web Service on Render
+
+1. Go to [https://render.com](https://render.com) and sign in (GitHub login works well).
+2. Click **New +** → **Web Service**.
+3. Connect the **Inventory Management System** repository.
+4. Use these settings:
+
+| Setting | Value |
+|---------|--------|
+| **Name** | `stockflow` (or any name you like) |
+| **Runtime** | `Python 3` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `gunicorn app:app --bind 0.0.0.0:$PORT --workers 1` |
+| **Instance Type** | Free |
+
+5. Under **Environment Variables**, add:
+
+| Key | Value |
+|-----|--------|
+| `SECRET_KEY` | any long random string (or click **Generate**) |
+
+6. Click **Create Web Service** and wait for the deploy to finish.
+7. Open the URL Render gives you (example: `https://stockflow.onrender.com`).
+
+Demo login stays the same: `admin` / `Inventory@2026`.
+
+### Notes about SQLite on Render
+
+- The free plan uses an **ephemeral filesystem**, so product data can reset when the service redeploys or restarts.
+- That is fine for a portfolio demo. Sample data is recreated automatically.
+- For permanent data later, add a Render **PostgreSQL** database or a paid **persistent disk**.
+
+You can also deploy with the included `render.yaml` via **New +** → **Blueprint**.
+
 ## Folder Structure
 
 ```text
 Inventory Management System/
 ├── app.py                 # Flask routes, database, auth, CSV export
 ├── requirements.txt       # Python packages
+├── Procfile               # Gunicorn start command for Render
+├── render.yaml            # Optional Render Blueprint config
 ├── BUILD_GUIDE.md         # Step-by-step development walkthrough
 ├── inventory.db           # Created automatically on first run
 ├── docs/
@@ -125,7 +167,7 @@ For a detailed walkthrough of how the app was built, see [BUILD_GUIDE.md](BUILD_
 - Passwords are hashed (Werkzeug), not stored in plain text.
 - Routes that change data require login.
 - SQL uses parameterized queries (`?` placeholders) to avoid SQL injection.
-- For a real deployment: set a strong `SECRET_KEY` env var, turn off `debug=True`, and use a production server (e.g. Gunicorn) behind HTTPS.
+- On Render, set a strong `SECRET_KEY` environment variable and serve with Gunicorn over HTTPS.
 
 ## What I Learned
 

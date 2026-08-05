@@ -19,8 +19,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+if os.environ.get("FLASK_ENV") == "production" or os.environ.get("RENDER"):
+    app.config["SESSION_COOKIE_SECURE"] = True
 
-DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "inventory.db")
+DATABASE = os.environ.get(
+    "DATABASE_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "inventory.db"),
+)
 LOW_STOCK_THRESHOLD = 10
 
 
@@ -450,6 +457,8 @@ def export_csv():
     return response
 
 
+# Initialize DB when the app starts (local `python app.py` or Gunicorn on Render)
+init_db()
+
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "1") == "1")
