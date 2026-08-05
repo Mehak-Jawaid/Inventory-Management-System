@@ -69,13 +69,19 @@ def init_db():
         """
     )
 
+    admin_password_hash = generate_password_hash("Inventory@2026")
     admin = cursor.execute(
         "SELECT id FROM users WHERE username = ?", ("admin",)
     ).fetchone()
     if not admin:
         cursor.execute(
             "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            ("admin", generate_password_hash("admin123")),
+            ("admin", admin_password_hash),
+        )
+    else:
+        cursor.execute(
+            "UPDATE users SET password_hash = ? WHERE username = ?",
+            (admin_password_hash, "admin"),
         )
 
     sample_count = cursor.execute("SELECT COUNT(*) AS count FROM products").fetchone()[
